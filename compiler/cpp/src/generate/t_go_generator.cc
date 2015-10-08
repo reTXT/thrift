@@ -424,11 +424,11 @@ bool t_go_generator::is_pointer_field(t_field* tfield, bool in_container_value) 
 std::string t_go_generator::camelcase(const std::string& value) const {
   std::string value2(value);
   std::setlocale(LC_ALL, "C"); // set locale to classic
-  
+
   // Fix common initialism in first word
   fix_common_initialism(value2, 0);
 
-  // as long as we are changing things, let's change _ followed by lowercase to 
+  // as long as we are changing things, let's change _ followed by lowercase to
   // capital and fix common initialisms
   for (std::string::size_type i = 1; i < value2.size() - 1; ++i) {
     if (value2[i] == '_') {
@@ -446,7 +446,11 @@ std::string t_go_generator::camelcase(const std::string& value) const {
 // and if so replaces it with the upper case version of the word.
 void t_go_generator::fix_common_initialism(std::string& value, int i) const {
   if (!ignore_initialisms_) {
-    std::string word = value.substr(i, value.find('_', i));
+    size_t wordLen = value.find('_', i);
+    if (wordLen != std::string::npos) {
+      wordLen -= i;
+    }
+    std::string word = value.substr(i, wordLen);
     std::transform(word.begin(), word.end(), word.begin(), ::toupper);
     if (commonInitialisms.find(word) != commonInitialisms.end()) {
       value.replace(i, word.length(), word);
@@ -1040,21 +1044,13 @@ string t_go_generator::render_const_value(t_type* type, t_const_value* value, co
         throw "type error: " + type->get_name() + " has no field " + v_iter->first->get_string();
       }
 
-      if (field_type->is_base_type() || field_type->is_enum()) {
-        out << endl << indent() << publicize(v_iter->first->get_string()) << ": "
-            << render_const_value(field_type, v_iter->second, name) << ",";
-      } else {
-        string k(tmp("k"));
-        string v(tmp("v"));
-        out << endl << indent() << v << " := " << render_const_value(field_type, v_iter->second, v)
-            << endl << indent() << name << "." << publicize(v_iter->first->get_string()) << " = "
-            << v;
-      }
+      out << endl << indent() << publicize(v_iter->first->get_string()) << ": "
+          << render_const_value(field_type, v_iter->second, name) << "," << endl;
     }
 
+    indent_down();
     out << "}";
 
-    indent_down();
   } else if (type->is_map()) {
     t_type* ktype = ((t_map*)type)->get_key_type();
     t_type* vtype = ((t_map*)type)->get_val_type();
@@ -2494,7 +2490,7 @@ void t_go_generator::generate_service_server(t_service* tservice) {
     }
   }
 
-  string pServiceName(privatize(serviceName));
+  string pServiceName(privatize(tservice->get_name()));
   // Generate the header portion
   string self(tmp("self"));
 
@@ -3049,7 +3045,7 @@ void t_go_generator::generate_serialize_field(ofstream& out,
         break;
 
       case t_base_type::TYPE_BYTE:
-        out << "WriteByte(byte(" << name << "))";
+        out << "WriteByte(int8(" << name << "))";
         break;
 
       case t_base_type::TYPE_I16:

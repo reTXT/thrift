@@ -78,6 +78,11 @@ public:
     out = thing;
   }
 
+  bool testBool(const bool thing) {
+    printf("testBool(%s)\n", thing ? "true" : "false");
+    return thing;
+  }
+
   int8_t testByte(const int8_t thing) {
     printf("testByte(%d)\n", (int)thing);
     return thing;
@@ -216,34 +221,14 @@ public:
   }
 
   void testInsanity(map<UserId, map<Numberz::type, Insanity> >& insane, const Insanity& argument) {
-    (void)argument;
     printf("testInsanity()\n");
 
-    Xtruct hello;
-    hello.string_thing = "Hello2";
-    hello.byte_thing = 2;
-    hello.i32_thing = 2;
-    hello.i64_thing = 2;
-
-    Xtruct goodbye;
-    goodbye.string_thing = "Goodbye4";
-    goodbye.byte_thing = 4;
-    goodbye.i32_thing = 4;
-    goodbye.i64_thing = 4;
-
-    Insanity crazy;
-    crazy.userMap.insert(make_pair(Numberz::EIGHT, 8));
-    crazy.xtructs.push_back(goodbye);
-
     Insanity looney;
-    crazy.userMap.insert(make_pair(Numberz::FIVE, 5));
-    crazy.xtructs.push_back(hello);
-
     map<Numberz::type, Insanity> first_map;
     map<Numberz::type, Insanity> second_map;
 
-    first_map.insert(make_pair(Numberz::TWO, crazy));
-    first_map.insert(make_pair(Numberz::THREE, crazy));
+    first_map.insert(make_pair(Numberz::TWO, argument));
+    first_map.insert(make_pair(Numberz::THREE, argument));
 
     second_map.insert(make_pair(Numberz::SIX, looney));
 
@@ -304,7 +289,7 @@ public:
     hello.i64_thing = (int64_t)arg2;
   }
 
-  void testException(const std::string& arg) throw(Xception, apache::thrift::TException) {
+  void testException(const std::string& arg) {
     printf("testException(%s)\n", arg.c_str());
     if (arg.compare("Xception") == 0) {
       Xception e;
@@ -323,7 +308,7 @@ public:
 
   void testMultiException(Xtruct& result,
                           const std::string& arg0,
-                          const std::string& arg1) throw(Xception, Xception2) {
+                          const std::string& arg1) {
 
     printf("testMultiException(%s, %s)\n", arg0.c_str(), arg1.c_str());
 
@@ -395,6 +380,11 @@ public:
                           const std::string& thing) {
     std::string res;
     _delegate->testString(res, thing);
+    cob(res);
+  }
+
+  virtual void testBool(tcxx::function<void(bool const& _return)> cob, const bool thing) {
+    bool res = _delegate->testBool(thing);
     cob(res);
   }
 
