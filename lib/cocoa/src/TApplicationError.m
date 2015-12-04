@@ -21,12 +21,12 @@
 #import "TProtocolUtil.h"
 
 
-NSString *TApplicationErrorDomain = @"TApplicationErrorDomain";
+NSString *const TApplicationErrorDomain = @"TApplicationErrorDomain";
 
 
-NSString *TApplicationErrorNameKey = @"name";
-NSString *TApplicationErrorReasonKey = @"reason";
-NSString *TApplicationErrorMethodKey = @"method";
+NSString *const TApplicationErrorNameKey = @"name";
+NSString *const TApplicationErrorReasonKey = @"reason";
+NSString *const TApplicationErrorMethodKey = @"method";
 
 
 @implementation NSError (TApplicationError)

@@ -20,8 +20,8 @@
 #import "TTransportError.h"
 
 
-NSString *TTransportErrorDomain = @"TTransportErrorDomain";
+NSString *const TTransportErrorDomain = @"TTransportErrorDomain";
 
 
-NSString *TTransportErrorExtendedErrorKey = @"extendedError";
-NSString *TTransportErrorHttpErrorKey = @"httpError";
+NSString *const TTransportErrorExtendedErrorKey = @"extendedError";
+NSString *const TTransportErrorHttpErrorKey = @"httpError";

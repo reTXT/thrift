@@ -95,8 +95,12 @@
 
 -(BOOL) readAll:(UInt8 *)outBuffer offset:(UInt32)outBufferOffset length:(UInt32)length error:(NSError *__autoreleasing *)error
 {
-  UInt32 got = [self readAvail:outBuffer offset:outBufferOffset maxLength:length error:error];
-  if (got != length) {
+  UInt32 read = length;
+  if (![self readAvail:outBuffer offset:outBufferOffset length:&length error:error]) {
+    return NO;
+  }
+  
+  if (read != length) {
 
     // Report underflow only if readAvail didn't report error already
     if (error && !*error) {
@@ -111,18 +115,20 @@
   return YES;
 }
 
--(UInt32) readAvail:(UInt8 *)outBuffer offset:(UInt32)outBufferOffset maxLength:(UInt32)maxLength error:(NSError *__autoreleasing *)error
+-(BOOL) readAvail:(UInt8 *)outBuffer offset:(UInt32)outBufferOffset length:(UInt32 *)length error:(NSError *__autoreleasing *)error
 {
   NSUInteger avail = _responseData.length - _responseDataOffset;
 
   NSRange range;
   range.location = _responseDataOffset;
-  range.length = MIN(maxLength, avail);
+  range.length = MIN(*length, avail);
 
   [_responseData getBytes:outBuffer+outBufferOffset range:range];
   _responseDataOffset += range.length;
 
-  return (UInt32)range.length;
+  *length = (UInt32)range.length;
+  
+  return YES;
 }
 
 -(BOOL) write:(const UInt8 *)data offset:(UInt32)offset length:(UInt32)length error:(NSError *__autoreleasing *)error
