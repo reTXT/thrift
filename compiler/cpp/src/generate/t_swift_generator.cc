@@ -456,6 +456,13 @@ void t_swift_generator::generate_swift_struct(ofstream& out,
   
   indent(out) << visibility << " init()";
   block_open(out);
+
+  for (m_iter = members.begin(); m_iter != members.end(); ++m_iter) {
+    if (!field_is_optional(*m_iter)) {
+      indent(out) << "self." << (*m_iter)->get_name() << " = " << type_name((*m_iter)->get_type(), false) << "()" << endl;
+    }
+  }
+  
   block_close(out);
   
   out << endl;
@@ -1987,12 +1994,7 @@ string t_swift_generator::declare_property(t_field* tfield, bool is_private) {
 
   render << visibility << " var " << tfield->get_name();
   
-  if (field_is_optional(tfield)) {
-    render << " : " << type_name(tfield->get_type(), true);
-  }
-  else {
-    render << " = " << type_name(tfield->get_type(), false) << "()";
-  }
+  render << " : " << type_name(tfield->get_type(), field_is_optional(tfield));
   
   return render.str();
 }
