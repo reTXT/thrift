@@ -20,7 +20,7 @@
 #import "TError.h"
 
 
-extern NSString *TProtocolErrorDomain;
+extern NSString *const TProtocolErrorDomain;
 
 typedef NS_ENUM (int, TProtocolError) {
   TProtocolErrorUnknown                   = 0,
@@ -39,15 +39,15 @@ typedef NS_ENUM(int, TProtocolExtendedError) {
   TProtocolExtendedErrorMismatchedProtocol    = 1003,
 };
 
-extern NSString *TProtocolErrorExtendedErrorKey;
-extern NSString *TProtocolErrorFieldNameKey;
-extern NSString *TProtocolErrorExpectedIdKey;
-extern NSString *TProtocolErrorExpectedVersionKey;
-extern NSString *TProtocolErrorTypeKey;
-extern NSString *TProtocolErrorSourceLineKey;
-extern NSString *TProtocolErrorSourceFileKey;
-extern NSString *TProtocolErrorSourceMethodKey;
-extern NSString *TProtocolErrorMessageNameKey;
+extern NSString *const TProtocolErrorExtendedErrorKey;
+extern NSString *const TProtocolErrorFieldNameKey;
+extern NSString *const TProtocolErrorExpectedIdKey;
+extern NSString *const TProtocolErrorExpectedVersionKey;
+extern NSString *const TProtocolErrorTypeKey;
+extern NSString *const TProtocolErrorSourceLineKey;
+extern NSString *const TProtocolErrorSourceFileKey;
+extern NSString *const TProtocolErrorSourceMethodKey;
+extern NSString *const TProtocolErrorMessageNameKey;
 
 
 #define PROTOCOL_ERROR(ret, err, ...) \

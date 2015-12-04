@@ -20,14 +20,14 @@
 #import "TProtocolError.h"
 
 
-NSString *TProtocolErrorDomain = @"TProtocolErrorDomain";
+NSString *const TProtocolErrorDomain = @"TProtocolErrorDomain";
 
-NSString *TProtocolErrorExtendedErrorKey = @"extendedError";
-NSString *TProtocolErrorFieldNameKey = @"field";
-NSString *TProtocolErrorExpectedIdKey = @"expectedId";
-NSString *TProtocolErrorExpectedVersionKey = @"expectedVersion";
-NSString *TProtocolErrorTypeKey = @"type";
-NSString *TProtocolErrorSourceLineKey = @"sourceLine";
-NSString *TProtocolErrorSourceFileKey = @"sourceFile";
-NSString *TProtocolErrorSourceMethodKey = @"sourceMethod";
-NSString *TProtocolErrorMessageNameKey = @"messageName";
+NSString *const TProtocolErrorExtendedErrorKey = @"extendedError";
+NSString *const TProtocolErrorFieldNameKey = @"field";
+NSString *const TProtocolErrorExpectedIdKey = @"expectedId";
+NSString *const TProtocolErrorExpectedVersionKey = @"expectedVersion";
+NSString *const TProtocolErrorTypeKey = @"type";
+NSString *const TProtocolErrorSourceLineKey = @"sourceLine";
+NSString *const TProtocolErrorSourceFileKey = @"sourceFile";
+NSString *const TProtocolErrorSourceMethodKey = @"sourceMethod";
+NSString *const TProtocolErrorMessageNameKey = @"messageName";

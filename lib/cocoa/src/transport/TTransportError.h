@@ -20,10 +20,10 @@
 #import "TError.h"
 
 
-extern NSString *TTransportErrorDomain;
+extern NSString *const TTransportErrorDomain;
 
 
-typedef NS_ENUM (int, TTransportError) {
+typedef NS_ENUM (NSInteger, TTransportError) {
   TTransportErrorUnknown        = 0,
   TTransportErrorNotOpen        = 1,
   TTransportErrorAlreadyOpen    = 2,
@@ -32,11 +32,11 @@ typedef NS_ENUM (int, TTransportError) {
 };
 
 
-extern NSString *TTransportErrorExtendedErrorKey;
-extern NSString *TTransportErrorHttpErrorKey;
+extern NSString *const TTransportErrorExtendedErrorKey;
+extern NSString *const TTransportErrorHttpErrorKey;
 
 
-typedef NS_ENUM(int, THttpTransportError) {
+typedef NS_ENUM(NSInteger, THttpTransportError) {
   THttpTransportErrorInvalidResponse  = 1001,
   THttpTransportErrorInvalidStatus    = 1002,
   THttpTransportErrorAuthentication   = 1003,

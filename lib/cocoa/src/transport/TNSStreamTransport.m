@@ -75,20 +75,20 @@
 }
 
 
--(UInt32) readAvail:(UInt8 *)buf offset:(UInt32)off maxLength:(UInt32)len error:(NSError *__autoreleasing *)error
+-(BOOL) readAvail:(UInt8 *)buf offset:(UInt32)off length:(UInt32 *)length error:(NSError *__autoreleasing *)error
 {
   UInt32 got = 0;
-  while (got < len) {
+  while (got < *length) {
 
-    UInt32 read = (UInt32)[_input read:buf+off+got maxLength:len-got];
+    UInt32 read = (UInt32)[_input read:buf+off+got maxLength:*length-got];
     if (read <= 0) {
       break;
     }
 
     got += read;
   }
-
-  return got;
+  *length = got;
+  return YES;
 }
 
 
