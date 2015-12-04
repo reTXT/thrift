@@ -20,87 +20,116 @@
 import Foundation
 
 
-public struct TBinary : TSerializable {
+
+public struct TBinary : MutableCollectionType, Hashable, ArrayLiteralConvertible, TSerializable {
   
   public static var thriftType : TType { return .STRING }
   
-  private var storage : NSData
+  public typealias Element = UInt8
   
-  public init() {
-    self.storage = NSData()
+  public typealias Index = Storage.Index
+  
+  public typealias Storage = [UInt8]
+  
+  public var storage = Storage()
+  
+  public var startIndex : Index {
+    return storage.startIndex
   }
   
-  public init(contentsOfFile file: String, options: NSDataReadingOptions = []) throws {
-    self.storage = try NSData(contentsOfFile: file, options: options)
+  public var endIndex : Index {
+    return storage.endIndex
   }
   
-  public init(contentsOfURL URL: NSURL, options: NSDataReadingOptions = []) throws {
-    self.storage = try NSData(contentsOfURL: URL, options: options)
-  }
-  
-  public init?(base64EncodedData base64Data: NSData, options: NSDataBase64DecodingOptions = []) {
-    guard let storage = NSData(base64EncodedData: base64Data, options: options) else {
-      return nil
+  public subscript (position: Index) -> Element {
+    get {
+      return storage[position]
     }
-    self.storage = storage
-  }
-  
-  public init(data: NSData) {
-    self.storage = data
-  }
-  
-  public var length : Int {
-    return storage.length
+    set {
+      storage[position] = newValue
+    }
   }
   
   public var hashValue : Int {
-    return storage.hashValue
-  }
-  
-  public var bytes : UnsafePointer<Void> {
-    return storage.bytes
-  }
-  
-  public func getBytes(buffer: UnsafeMutablePointer<Void>, length: Int) {
-    storage.getBytes(buffer, length: length)
-  }
-  
-  public func getBytes(buffer: UnsafeMutablePointer<Void>, range: Range<Int>) {
-    storage.getBytes(buffer, range: NSRange(range))
-  }
-  
-  public func subBinaryWithRange(range: Range<Int>) -> TBinary {
-    return TBinary(data: storage.subdataWithRange(NSRange(range)))
-  }
-  
-  public func writeToFile(path: String, options: NSDataWritingOptions = []) throws {
-    try storage.writeToFile(path, options: options)
-  }
-  
-  public func writeToURL(url: NSURL, options: NSDataWritingOptions = []) throws {
-    try storage.writeToURL(url, options: options)
-  }
-  
-  public func rangeOfData(dataToFind data: NSData, options: NSDataSearchOptions, range: Range<Int>) -> Range<Int>? {
-    return storage.rangeOfData(data, options: options, range: NSRange(range)).toRange()
-  }
-  
-  public func enumerateByteRangesUsingBlock(block: (UnsafePointer<Void>, Range<Int>, inout Bool) -> Void) {
-    storage.enumerateByteRangesUsingBlock { bytes, range, stop in
-      var stopTmp = Bool(stop.memory)
-      block(bytes, range.toRange()!, &stopTmp)
-      stop.memory = ObjCBool(stopTmp)
+    let prime = 31
+    var result = 1
+    for element in storage {
+      result = prime * result + element.hashValue
     }
+    return result
+  }
+  
+  public init() {
+    self.storage = Storage()
+  }
+  
+  public init(arrayLiteral elements: Element...) {
+    self.storage = Storage(storage)
+  }
+
+  public init(_ data: Storage) {
+    self.storage = data
+  }
+  
+  public init(_ data: UnsafeBufferPointer<UInt8>) {
+    self.storage = Storage(data)
+  }
+  
+  public init(_ data: NSData) {
+    self.storage = Storage(UnsafeBufferPointer(start: UnsafePointer(data.bytes), count: data.length))
+  }
+  
+  public mutating func append(newElement: Element) {
+    self.storage.append(newElement)
+  }
+  
+  public mutating func appendContentsOf<C : CollectionType where C.Generator.Element == Element>(newstorage: C) {
+    self.storage.appendContentsOf(newstorage)
+  }
+  
+  public mutating func insert(newElement: Element, atIndex index: Int) {
+    self.storage.insert(newElement, atIndex: index)
+  }
+  
+  public mutating func insertContentsOf<C : CollectionType where C.Generator.Element == Element>(newElements: C, at index: Int) {
+    self.storage.insertContentsOf(newElements, at: index)
+  }
+  
+  public mutating func removeAll(keepCapacity keepCapacity: Bool = true) {
+    self.storage.removeAll(keepCapacity: keepCapacity)
+  }
+  
+  public mutating func removeAtIndex(index: Index) {
+    self.storage.removeAtIndex(index)
+  }
+  
+  public mutating func removeFirst(n: Int = 0) {
+    self.storage.removeFirst(n)
+  }
+  
+  public mutating func removeLast() -> Element {
+    return self.storage.removeLast()
+  }
+  
+  public mutating func removeRange(subRange: Range<Index>) {
+    self.storage.removeRange(subRange)
+  }
+  
+  public mutating func reserveCapacity(minimumCapacity: Int) {
+    self.storage.reserveCapacity(minimumCapacity)
   }
   
   public static func readValueFromProtocol(proto: TProtocol) throws -> TBinary {
     var data : NSData?
     try proto.readBinary(&data)
-    return TBinary(data: data!)
+    guard let validData = data else {
+      throw TProtocolError.InvalidData
+    }
+    return TBinary(UnsafeBufferPointer(start: UnsafePointer(validData.bytes), count: validData.length))
   }
   
   public static func writeValue(value: TBinary, toProtocol proto: TProtocol) throws {
-    try proto.writeBinary(value.storage)
+    try proto.writeBinary(NSData(bytes: value.storage, length: value.storage.count))
   }
   
 }

@@ -24,13 +24,13 @@ public struct TMap<Key : TSerializable, Value : TSerializable> : CollectionType,
   
   public static var thriftType : TType { return .MAP }
 
-  typealias Storage = Dictionary<Key, Value>
+  public typealias Storage = Dictionary<Key, Value>
 
   public typealias Index = Storage.Index
 
   public typealias Element = Storage.Element
   
-  private var storage : Storage
+  public var storage : Storage
 
   public var startIndex : Index {
     return storage.startIndex
@@ -57,6 +57,10 @@ public struct TMap<Key : TSerializable, Value : TSerializable> : CollectionType,
     for (key, value) in elements {
       storage[key] = value
     }
+  }
+  
+  public init(_ dictionary: [Key: Value]) {
+    storage = dictionary
   }
   
   public init(minimumCapacity: Int) {
