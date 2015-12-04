@@ -26,9 +26,9 @@ public struct TSet<Element : TSerializable> : CollectionType, ArrayLiteralConver
   
   public typealias Index = Storage.Index
   
-  typealias Storage = Set<Element>
+  public typealias Storage = Set<Element>
   
-  private var storage : Storage
+  public var storage : Storage
   
   public init() {
     storage = Storage()
@@ -36,6 +36,10 @@ public struct TSet<Element : TSerializable> : CollectionType, ArrayLiteralConver
   
   public init(arrayLiteral elements: Element...) {
     storage = Storage(elements)
+  }
+  
+  public init(_ set: Set<Element>) {
+    storage = set
   }
   
   public init<S : SequenceType where S.Generator.Element == Element>(_ sequence: S) {
