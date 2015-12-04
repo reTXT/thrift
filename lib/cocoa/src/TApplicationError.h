@@ -19,7 +19,7 @@
 
 #import "TProtocol.h"
 
-extern NSString *TApplicationErrorDomain;
+extern NSString *const TApplicationErrorDomain;
 
 typedef NS_ENUM (int, TApplicationError) {
   TApplicationErrorUnknown                = 0,
@@ -36,9 +36,9 @@ typedef NS_ENUM (int, TApplicationError) {
 };
 
 
-extern NSString *TApplicationErrorNameKey;
-extern NSString *TApplicationErrorReasonKey;
-extern NSString *TApplicationErrorMethodKey;
+extern NSString *const TApplicationErrorNameKey;
+extern NSString *const TApplicationErrorReasonKey;
+extern NSString *const TApplicationErrorMethodKey;
 
 
 @interface NSError (TApplicationError)

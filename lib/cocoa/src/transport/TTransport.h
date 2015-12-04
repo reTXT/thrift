@@ -34,13 +34,13 @@ NS_ASSUME_NONNULL_BEGIN
  * @return YES if succeeded, NO if failed
  * @throws TTransportError if there was an error reading data
  */
--(BOOL) readAll:(UInt8 *)buf offset:(UInt32)off length:(UInt32)len error:(NSError *__autoreleasing *)error;
+-(BOOL) readAll:(UInt8 *)buf offset:(UInt32)offset length:(UInt32)length error:(NSError *__autoreleasing *)error;
 
--(UInt32) readAvail:(UInt8 *)buf offset:(UInt32)off maxLength:(UInt32)maxLen error:(NSError *__autoreleasing *)error;
+-(BOOL) readAvail:(UInt8 *)buf offset:(UInt32)offset length:(UInt32 *)length error:(NSError *__autoreleasing *)error NS_REFINED_FOR_SWIFT;
 
 -(BOOL) write:(const UInt8 *)data offset:(UInt32)offset length:(UInt32)length error:(NSError *__autoreleasing *)error;
 
--(BOOL) flush:(NSError *__autoreleasing *)error;
+-(BOOL) flush:(NSError *__autoreleasing *)error ;
 
 @end
 
