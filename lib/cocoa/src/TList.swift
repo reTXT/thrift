@@ -25,11 +25,11 @@ public struct TList<Element : TSerializable> : MutableCollectionType, Hashable, 
   
   public static var thriftType : TType { return .LIST }
   
-  typealias Storage = Array<Element>
+  public typealias Storage = Array<Element>
 
   public typealias Index = Storage.Index
   
-  private var storage = Storage()
+  public var storage = Storage()
   
   public var startIndex : Index {
     return storage.startIndex
@@ -59,6 +59,10 @@ public struct TList<Element : TSerializable> : MutableCollectionType, Hashable, 
   
   public init(arrayLiteral elements: Element...) {
     self.storage = Storage(storage)
+  }
+  
+  public init(_ array: [Element]) {
+    self.storage = array
   }
   
   public init() {
