@@ -28,7 +28,8 @@ import sys
 import time
 import traceback
 
-from crossrunner.test import TestEntry
+from .compat import path_join, str_join
+from .test import TestEntry
 
 LOG_DIR = 'log'
 RESULT_HTML = 'result.html'
@@ -84,7 +85,7 @@ class TestReporter(object):
   @classmethod
   def test_logfile(cls, test_name, prog_kind, dir=None):
     relpath = os.path.join('log', '%s_%s.log' % (test_name, prog_kind))
-    return relpath if not dir else os.path.realpath(os.path.join(dir, relpath))
+    return relpath if not dir else os.path.realpath(path_join(dir, relpath))
 
   def _start(self):
     self._start_time = time.time()
@@ -195,7 +196,7 @@ class ExecReporter(TestReporter):
 
   def _print_header(self):
     self._print_date()
-    self.out.write('Executing: %s\n' % ' '.join(self._prog.command))
+    self.out.write('Executing: %s\n' % str_join(' ', self._prog.command))
     self.out.write('Directory: %s\n' % self._prog.workdir)
     self.out.write('config:delay: %s\n' % self._test.delay)
     self.out.write('config:timeout: %s\n' % self._test.timeout)

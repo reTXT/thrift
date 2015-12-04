@@ -233,13 +233,14 @@ AX_THRIFT_LIB(erlang, [Erlang], yes)
 if test "$with_erlang" = "yes";  then
   AC_ERLANG_PATH_ERL
   AC_ERLANG_PATH_ERLC
+  AC_PATH_PROG([REBAR], [rebar])
   if test -n "$ERLC" ; then
     AC_ERLANG_SUBST_LIB_DIR
     # Install into the detected Erlang directory instead of $libdir/erlang/lib
     ERLANG_INSTALL_LIB_DIR="$ERLANG_LIB_DIR"
     AC_ERLANG_SUBST_INSTALL_LIB_SUBDIR(AC_PACKAGE_NAME, AC_PACKAGE_VERSION)
   fi
-  if test -n "$ERL" -a -n "$ERLC" ; then
+  if test -n "$ERL" -a -n "$ERLC" && test "x$REBAR" != "x" ; then
     have_erlang="yes"
 
     # otp_release is simply a number (like "17") for OTP17+ while "R16..." for OTP16 or less.
@@ -284,6 +285,16 @@ if test "$with_python" = "yes";  then
   fi
 fi
 AM_CONDITIONAL(WITH_PYTHON, [test "$have_python" = "yes"])
+
+# Find "python3" executable.
+# It's distro specific and far from ideal but needed to cross test py2-3 at once.
+if test "x$have_python" = "xyes"; then
+  AC_PATH_PROG([PYTHON3], [python3])
+  if test "x$PYTHON3" != "x" && test "x$PYTHON3" != "x:" ; then
+    have_py3="yes"
+  fi
+fi
+AM_CONDITIONAL(WITH_PY3, [test "$have_py3" = "yes"])
 
 AX_THRIFT_LIB(perl, [Perl], yes)
 if test "$with_perl" = "yes"; then
@@ -782,6 +793,8 @@ if test "$have_csharp" = "yes" ; then MAYBE_CSHARP="csharp" ; else MAYBE_CSHARP=
 AC_SUBST([MAYBE_CSHARP])
 if test "$have_python" = "yes" ; then MAYBE_PYTHON="py" ; else MAYBE_PYTHON="" ; fi
 AC_SUBST([MAYBE_PYTHON])
+if test "$have_py3" = "yes" ; then MAYBE_PY3="py3" ; else MAYBE_PY3="" ; fi
+AC_SUBST([MAYBE_PY3])
 if test "$have_ruby" = "yes" ; then MAYBE_RUBY="rb" ; else MAYBE_RUBY="" ; fi
 AC_SUBST([MAYBE_RUBY])
 if test "$have_haskell" = "yes" ; then MAYBE_HASKELL="hs" ; else MAYBE_HASKELL="" ; fi
@@ -796,6 +809,8 @@ if test "$have_go" = "yes" ; then MAYBE_GO="go" ; else MAYBE_GO="" ; fi
 AC_SUBST([MAYBE_GO])
 if test "$have_nodejs" = "yes" ; then MAYBE_NODEJS="nodejs" ; else MAYBE_NODEJS="" ; fi
 AC_SUBST([MAYBE_NODEJS])
+if test "$have_erlang" = "yes" ; then MAYBE_ERLANG="erl" ; else MAYBE_ERLANG="" ; fi
+AC_SUBST([MAYBE_ERLANG])
 
 AC_OUTPUT
 
@@ -883,6 +898,7 @@ if test "$have_erlang" = "yes" ; then
   echo
   echo "Erlang Library:"
   echo "   Using erlc ................ : $ERLC"
+  echo "   Using rebar ............... : $REBAR"
 fi
 if test "$have_go" = "yes" ; then
   echo

@@ -21,6 +21,7 @@ import contextlib
 import multiprocessing
 import multiprocessing.managers
 import os
+import sys
 import platform
 import random
 import socket
@@ -30,8 +31,9 @@ import threading
 import time
 import traceback
 
-from crossrunner.test import TestEntry, domain_socket_path
-from crossrunner.report import ExecReporter, SummaryReporter
+from .compat import str_join
+from .test import TestEntry, domain_socket_path
+from .report import ExecReporter, SummaryReporter
 
 RESULT_TIMEOUT = 128
 RESULT_ERROR = 64
@@ -81,7 +83,8 @@ class ExecutionContext(object):
     return args
 
   def start(self, timeout=0):
-    self._log.debug('COMMAND: %s', ' '.join(self.cmd))
+    joined = str_join(' ', self.cmd)
+    self._log.debug('COMMAND: %s', joined)
     self._log.debug('WORKDIR: %s', self.cwd)
     self._log.debug('LOGFILE: %s', self.report.logpath)
     self.report.begin()
