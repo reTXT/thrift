@@ -175,6 +175,15 @@ class TJSONProtocolBase(TProtocolBase):
     self.resetWriteContext()
     self.resetReadContext()
 
+  # We don't have length limit implementation for JSON protocols
+  @property
+  def string_length_limit(senf):
+    return None
+
+  @property
+  def container_length_limit(senf):
+    return None
+
   def resetWriteContext(self):
     self.context = JSONBaseContext(self)
     self.contextStack = [self.context]
@@ -203,7 +212,7 @@ class TJSONProtocolBase(TProtocolBase):
     json_str.append('"')
     self.trans.write(str_to_binary(''.join(json_str)))
 
-  def writeJSONNumber(self, number, formatter='{}'):
+  def writeJSONNumber(self, number, formatter='{0}'):
     self.context.write()
     jsNumber = str(formatter.format(number)).encode('ascii')
     if self.context.escapeNum():
@@ -550,7 +559,7 @@ class TJSONProtocol(TJSONProtocolBase):
 
   def writeDouble(self, dbl):
     # 17 significant digits should be just enough for any double precision value.
-    self.writeJSONNumber(dbl, '{:.17g}')
+    self.writeJSONNumber(dbl, '{0:.17g}')
 
   def writeString(self, string):
     self.writeJSONString(string)
@@ -559,10 +568,17 @@ class TJSONProtocol(TJSONProtocolBase):
     self.writeJSONBase64(binary)
 
 
-class TJSONProtocolFactory:
-
+class TJSONProtocolFactory(object):
   def getProtocol(self, trans):
     return TJSONProtocol(trans)
+
+  @property
+  def string_length_limit(senf):
+    return None
+
+  @property
+  def container_length_limit(senf):
+    return None
 
 
 class TSimpleJSONProtocol(TJSONProtocolBase):

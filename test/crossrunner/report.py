@@ -17,6 +17,7 @@
 # under the License.
 #
 
+from __future__ import print_function
 import datetime
 import json
 import multiprocessing
@@ -28,7 +29,7 @@ import sys
 import time
 import traceback
 
-from .compat import path_join, str_join
+from .compat import logfile_open, path_join, str_join
 from .test import TestEntry
 
 LOG_DIR = 'log'
@@ -44,7 +45,7 @@ def generate_known_failures(testdir, overwrite, save, out):
       if not r[success_index]:
         yield TestEntry.get_name(*r)
   try:
-    with open(os.path.join(testdir, RESULT_JSON), 'r') as fp:
+    with logfile_open(path_join(testdir, RESULT_JSON), 'r') as fp:
       results = json.load(fp)
   except IOError:
     sys.stderr.write('Unable to load last result. Did you run tests ?\n')
@@ -56,7 +57,7 @@ def generate_known_failures(testdir, overwrite, save, out):
     fails = known
   fails_json = json.dumps(sorted(set(fails)), indent=2, separators=(',', ': '))
   if save:
-    with open(os.path.join(testdir, FAIL_JSON % platform.system()), 'w+') as fp:
+    with logfile_open(os.path.join(testdir, FAIL_JSON % platform.system()), 'w+') as fp:
       fp.write(fails_json)
     sys.stdout.write('Successfully updated known failures.\n')
   if out:
@@ -67,7 +68,7 @@ def generate_known_failures(testdir, overwrite, save, out):
 
 def load_known_failures(testdir):
   try:
-    with open(os.path.join(testdir, FAIL_JSON % platform.system()), 'r') as fp:
+    with logfile_open(path_join(testdir, FAIL_JSON % platform.system()), 'r') as fp:
       return json.load(fp)
   except IOError:
     return []
@@ -84,7 +85,7 @@ class TestReporter(object):
 
   @classmethod
   def test_logfile(cls, test_name, prog_kind, dir=None):
-    relpath = os.path.join('log', '%s_%s.log' % (test_name, prog_kind))
+    relpath = path_join('log', '%s_%s.log' % (test_name, prog_kind))
     return relpath if not dir else os.path.realpath(path_join(dir, relpath))
 
   def _start(self):
@@ -138,16 +139,7 @@ class ExecReporter(TestReporter):
       self._lock.release()
 
   def killed(self):
-    self._lock.acquire()
-    try:
-      if self.out and not self.out.closed:
-        self._print_footer()
-        self._close()
-        self.out = None
-      else:
-        self._log.debug('Output stream is not available.')
-    finally:
-      self._lock.release()
+    self.end(None)
 
   _init_failure_exprs = {
     'server': list(map(re.compile, [
@@ -166,19 +158,17 @@ class ExecReporter(TestReporter):
   def maybe_false_positive(self):
     """Searches through log file for socket bind error.
     Returns True if suspicious expression is found, otherwise False"""
-    def match(line):
-      for expr in exprs:
-        if expr.search(line):
-          return True
     try:
       if self.out and not self.out.closed:
         self.out.flush()
-      exprs = list(map(re.compile, self._init_failure_exprs[self._prog.kind]))
+      exprs = self._init_failure_exprs[self._prog.kind]
 
-      server_logfile = self.logpath
-      # need to handle unicode errors on Python 3
-      kwargs = {} if sys.version_info[0] < 3 else {'errors': 'replace'}
-      with open(server_logfile, 'r', **kwargs) as fp:
+      def match(line):
+        for expr in exprs:
+          if expr.search(line):
+            return True
+
+      with logfile_open(self.logpath, 'r') as fp:
         if any(map(match, fp)):
           return True
     except (KeyboardInterrupt, SystemExit):
@@ -189,7 +179,7 @@ class ExecReporter(TestReporter):
     return False
 
   def _open(self):
-    self.out = open(self.logpath, 'w+')
+    self.out = logfile_open(self.logpath, 'w+')
 
   def _close(self):
     self.out.close()
@@ -217,8 +207,8 @@ class SummaryReporter(TestReporter):
   def __init__(self, testdir, concurrent=True):
     super(SummaryReporter, self).__init__()
     self.testdir = testdir
-    self.logdir = os.path.join(testdir, LOG_DIR)
-    self.out_path = os.path.join(testdir, RESULT_JSON)
+    self.logdir = path_join(testdir, LOG_DIR)
+    self.out_path = path_join(testdir, RESULT_JSON)
     self.concurrent = concurrent
     self.out = sys.stdout
     self._platform = platform.system()
@@ -333,7 +323,7 @@ class SummaryReporter(TestReporter):
   def _write_html_data(self):
     """Writes JSON data to be read by result html"""
     results = [self._render_result(r) for r in self._tests]
-    with open(self.out_path, 'w+') as fp:
+    with logfile_open(self.out_path, 'w+') as fp:
       fp.write(json.dumps({
         'date': self._format_date(),
         'revision': str(self._revision),
@@ -345,20 +335,20 @@ class SummaryReporter(TestReporter):
   def _assemble_log(self, title, indexes):
     if len(indexes) > 0:
       def add_prog_log(fp, test, prog_kind):
-        fp.write('*************************** %s message ***************************\n'
-                 % prog_kind)
+        print('*************************** %s message ***************************' % prog_kind,
+              file=fp)
         path = self.test_logfile(test.name, prog_kind, self.testdir)
-        kwargs = {} if sys.version_info[0] < 3 else {'errors': 'replace'}
-        with open(path, 'r', **kwargs) as prog_fp:
-          fp.write(prog_fp.read())
+        if os.path.exists(path):
+          with logfile_open(path, 'r') as prog_fp:
+            print(prog_fp.read(), file=fp)
       filename = title.replace(' ', '_') + '.log'
-      with open(os.path.join(self.logdir, filename), 'w+') as fp:
+      with logfile_open(os.path.join(self.logdir, filename), 'w+') as fp:
         for test in map(self._tests.__getitem__, indexes):
           fp.write('TEST: [%s]\n' % test.name)
           add_prog_log(fp, test, test.server.kind)
           add_prog_log(fp, test, test.client.kind)
           fp.write('**********************************************************************\n\n')
-      self.out.write('%s are logged to test/%s/%s\n' % (title.capitalize(), LOG_DIR, filename))
+      print('%s are logged to test/%s/%s' % (title.capitalize(), LOG_DIR, filename))
 
   def end(self):
     self._print_footer()

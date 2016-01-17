@@ -30,13 +30,15 @@ class TTransportException(TException):
   ALREADY_OPEN = 2
   TIMED_OUT = 3
   END_OF_FILE = 4
+  NEGATIVE_SIZE = 5
+  SIZE_LIMIT = 6
 
   def __init__(self, type=UNKNOWN, message=None):
     TException.__init__(self, message)
     self.type = type
 
 
-class TTransportBase:
+class TTransportBase(object):
   """Base class for Thrift transport layer."""
 
   def isOpen(self):
@@ -72,7 +74,7 @@ class TTransportBase:
 
 
 # This class should be thought of as an interface.
-class CReadableTransport:
+class CReadableTransport(object):
   """base class for transports that are readable from C"""
 
   # TODO(dreiss): Think about changing this interface to allow us to use
@@ -100,7 +102,7 @@ class CReadableTransport:
     pass
 
 
-class TServerTransportBase:
+class TServerTransportBase(object):
   """Base class for Thrift server transports."""
 
   def listen(self):
@@ -113,14 +115,14 @@ class TServerTransportBase:
     pass
 
 
-class TTransportFactoryBase:
+class TTransportFactoryBase(object):
   """Base class for a Transport Factory"""
 
   def getTransport(self, trans):
     return trans
 
 
-class TBufferedTransportFactory:
+class TBufferedTransportFactory(object):
   """Factory transport that builds buffered transports"""
 
   def getTransport(self, trans):
@@ -139,7 +141,8 @@ class TBufferedTransport(TTransportBase, CReadableTransport):
   def __init__(self, trans, rbuf_size=DEFAULT_BUFFER):
     self.__trans = trans
     self.__wbuf = BufferIO()
-    self.__rbuf = BufferIO()
+    # Pass string argument to initialize read buffer as cStringIO.InputType
+    self.__rbuf = BufferIO(b'')
     self.__rbuf_size = rbuf_size
 
   def isOpen(self):
@@ -243,7 +246,7 @@ class TMemoryBuffer(TTransportBase, CReadableTransport):
     raise EOFError()
 
 
-class TFramedTransportFactory:
+class TFramedTransportFactory(object):
   """Factory transport that builds framed transports"""
 
   def getTransport(self, trans):
@@ -256,7 +259,7 @@ class TFramedTransport(TTransportBase, CReadableTransport):
 
   def __init__(self, trans,):
     self.__trans = trans
-    self.__rbuf = BufferIO()
+    self.__rbuf = BufferIO(b'')
     self.__wbuf = BufferIO()
 
   def isOpen(self):
@@ -364,7 +367,7 @@ class TSaslClientTransport(TTransportBase, CReadableTransport):
     self.sasl = SASLClient(host, service, mechanism, **sasl_kwargs)
 
     self.__wbuf = BufferIO()
-    self.__rbuf = BufferIO()
+    self.__rbuf = BufferIO(b'')
 
   def open(self):
     if not self.transport.isOpen():

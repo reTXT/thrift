@@ -17,9 +17,7 @@
 # under the License.
 #
 
-from crossrunner.test import test_name
-from crossrunner.collect import collect_tests
-from crossrunner.run import TestDispatcher
-from crossrunner.report import generate_known_failures
-from crossrunner.report import load_known_failures
-from crossrunner.prepare import prepare
+from .test import test_name
+from .collect import collect_cross_tests, collect_feature_tests
+from .run import TestDispatcher
+from .report import generate_known_failures, load_known_failures

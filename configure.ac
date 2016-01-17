@@ -34,10 +34,8 @@ AC_ARG_VAR([PY_PREFIX], [Prefix for installing Python modules.
 AS_IF([test "x$PY_PREFIX" = x], [PY_PREFIX="/usr"])
 
 AC_ARG_VAR([JAVA_PREFIX], [Prefix for installing the Java lib jar.
-                           (Normal --prefix is ignored for Java because
-                           Java has different conventions.)
-                           Default = "/usr/local/lib"])
-AS_IF([test "x$JAVA_PREFIX" = x], [JAVA_PREFIX="/usr/local/lib"])
+                           Default = "PREFIX/usr/local/lib"])
+AS_IF([test "x$JAVA_PREFIX" = x], [JAVA_PREFIX="$prefix/usr/local/lib"])
 
 AC_ARG_VAR([RUBY_PREFIX], [Prefix for installing Ruby modules.
                            (Normal --prefix is ignored for Ruby because
@@ -279,7 +277,7 @@ AM_CONDITIONAL(WITH_LUA, [test "$have_lua" = "yes"])
 AX_THRIFT_LIB(python, [Python], yes)
 if test "$with_python" = "yes";  then
   AC_PATH_PROG([TRIAL], [trial])
-  AM_PATH_PYTHON(2.4,, :)
+  AM_PATH_PYTHON(2.6,, :)
   if test -n "$TRIAL" && test "x$PYTHON" != "x" && test "x$PYTHON" != "x:" ; then
     have_python="yes"
   fi
@@ -744,6 +742,8 @@ AC_CONFIG_FILES([
   lib/hs/Makefile
   lib/java/Makefile
   lib/js/test/Makefile
+  lib/json/Makefile
+  lib/json/test/Makefile
   lib/nodejs/Makefile
   lib/perl/Makefile
   lib/perl/test/Makefile
@@ -753,6 +753,8 @@ AC_CONFIG_FILES([
   lib/py/Makefile
   lib/rb/Makefile
   lib/lua/Makefile
+  lib/xml/Makefile
+  lib/xml/test/Makefile
   test/Makefile
   test/c_glib/Makefile
   test/cpp/Makefile
